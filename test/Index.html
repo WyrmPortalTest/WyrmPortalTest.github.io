@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wyrm Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(180deg, #1B0030, #000000);
+            color: #C0C0C0;
+        }
+        header {
+            background-color: #2E003E;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+        h1 {
+            margin: 0;
+            color: #C0C0C0;
+            margin-left: 10px; 
+        }
+        #logo {
+            width: 40px;
+            height: 40px;
+        }
+        #container {
+            display: flex;
+            height: 80vh;
+        }
+        #sidebar {
+            width: 250px;
+            background-color: #2E003E;
+            padding: 15px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+        }
+        #sidebar h2 {
+            color: #C0C0C0;
+        }
+        .chat-room {
+            background-color: #1B0030;
+            color: #C0C0C0;
+            margin: 10px 0;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .chat-room:hover {
+            background-color: #3E0050;
+        }
+        #chat-window {
+            flex: 1;
+            padding: 15px;
+            background-color: #1B0030;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #C0C0C0;
+        }
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #C0C0C0;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #2E003E;
+            color: #C0C0C0;
+            border-radius: 5px;
+        }
+        #input-container {
+            display: flex;
+        }
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #C0C0C0;
+            border-radius: 5px;
+            background-color: #1B0030;
+            color: #C0C0C0;
+        }
+        #send-button {
+            padding: 10px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2E003E;
+            color: #C0C0C0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #send-button:hover {
+            background-color: #3E0050;
+        }
+        #username-container {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        #username-input,
+        #password-input {
+            padding: 10px;
+            border: 1px solid #C0C0C0;
+            border-radius: 5px;
+            background-color: #1B0030;
+            color: #C0C0C0;
+            margin-bottom: 10px;
+        }
+        #set-username-button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2E003E;
+            color: #C0C0C0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #set-username-button:hover {
+            background-color: #3E0050;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img id="logo" src="https://via.placeholder.com/40" alt="Wyrm Logo" />
+        <h1>Wyrm Chat Room</h1>
+    </header>
+    <div id="container">
+        <div id="sidebar">
+            <h2>Chat Rooms</h2>
+            <div class="chat-room" onclick="switchRoom('Global')">Global Chat</div>
+            <div class="chat-room" onclick="switchRoom('Gaming')">Gaming</div>
+            <div class="chat-room" onclick="switchRoom('Tech')">Tech</div>
+            <div class="chat-room" onclick="switchRoom('Art')">Art</div>
+        </div>
+        <div id="chat-window">
+            <div id="username-container">
+                <input type="text" id="username-input" placeholder="Set your username..." />
+                <input type="password" id="password-input" placeholder="Set your password..." />
+                <button id="set-username-button" onclick="setUsername()">Set Username</button>
+                <p id="username-message"></p>
+            </div>
+            <div id="messages">
+                <p>Welcome to the Global chat room! Please set your username to start chatting.</p>
+            </div>
+            <div id="input-container">
+                <input type="text" id="message-input" placeholder="Type your message here..." disabled />
+                <button id="send-button" onclick="sendMessage()" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRoom = 'Global';
+        let username = '';
+        let password = '';
+        const users = {};
+        const messagesData = {
+            'Global': [],
+            'Gaming': [],
+            'Tech': [],
+            'Art': []
+        };
+
+        function switchRoom(room) {
+            currentRoom = room;
+            loadMessages();
+        }
+
+        function loadMessages() {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+            messagesData[currentRoom].forEach(msg => {
+                const p = document.createElement('p');
+                p.textContent = `${msg.user}: ${msg.text}`;
+                messagesDiv.appendChild(p);
+            });
+        }
+
+        function setUsername() {
+            const usernameInput = document.getElementById('username-input').value;
+            const passwordInput = document.getElementById('password-input').value;
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const usernameMessage = document.getElementById('username-message');
+
+            if (!usernameInput || !passwordInput) {
+                usernameMessage.textContent = "Username and password cannot be empty.";
+                return;
+            }
+
+            if (users[usernameInput]) {
+                usernameMessage.textContent = "Username is already taken.";
+                return;
+            }
+
+            username = usernameInput;
+            password = passwordInput;
+            users[username] = { password: password, bio: '', profilePic: '' };
+
+            usernameMessage.textContent = "";
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+
+            document.getElementById('username-container').style.display = 'none';
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const text = messageInput.value;
+
+            if (!text || !username) return;
+
+            messagesData[currentRoom].push({ user: username, text: text });
+            loadMessages();
+            messageInput.value = '';
+        }
+    </script>
+</body>
+</html>
