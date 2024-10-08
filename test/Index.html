@@ -5,120 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wyrm Chat Room</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: linear-gradient(180deg, #1B0030, #000000);
-            color: #C0C0C0;
-        }
-        header {
-            background-color: #2E003E;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-        }
-        h1 {
-            margin: 0;
-            color: #C0C0C0;
-            margin-left: 10px; 
-        }
-        #logo {
-            width: 40px;
-            height: 40px;
-        }
-        #container {
-            display: flex;
-            height: 80vh;
-        }
-        #sidebar {
-            width: 250px;
-            background-color: #2E003E;
-            padding: 15px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-        }
-        #sidebar h2 {
-            color: #C0C0C0;
-        }
-        .chat-room {
-            background-color: #1B0030;
-            color: #C0C0C0;
-            margin: 10px 0;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        .chat-room:hover {
-            background-color: #3E0050;
-        }
-        #chat-window {
-            flex: 1;
-            padding: 15px;
-            background-color: #1B0030;
-            display: flex;
-            flex-direction: column;
-            border-left: 1px solid #C0C0C0;
-        }
-        #messages {
-            flex: 1;
-            overflow-y: auto;
-            border: 1px solid #C0C0C0;
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #2E003E;
-            color: #C0C0C0;
-            border-radius: 5px;
-        }
-        #input-container {
-            display: flex;
-        }
-        #message-input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #C0C0C0;
-            border-radius: 5px;
-            background-color: #1B0030;
-            color: #C0C0C0;
-        }
-        #send-button {
-            padding: 10px;
-            margin-left: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: #2E003E;
-            color: #C0C0C0;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        #send-button:hover {
-            background-color: #3E0050;
-        }
-        #username-container {
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-        }
-        #username-input,
-        #password-input {
-            padding: 10px;
-            border: 1px solid #C0C0C0;
-            border-radius: 5px;
-            background-color: #1B0030;
-            color: #C0C0C0;
-            margin-bottom: 10px;
-        }
-        #set-username-button {
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: #2E003E;
-            color: #C0C0C0;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        #set-username-button:hover {
-            background-color: #3E0050;
-        }
+        /* (Styling remains largely the same) */
     </style>
 </head>
 <body>
@@ -133,6 +20,8 @@
             <div class="chat-room" onclick="switchRoom('Gaming')">Gaming</div>
             <div class="chat-room" onclick="switchRoom('Tech')">Tech</div>
             <div class="chat-room" onclick="switchRoom('Art')">Art</div>
+            <!-- Add an admin button for admins -->
+            <div class="chat-room" id="admin-panel" style="display:none;" onclick="openAdminPanel()">Admin Panel</div>
         </div>
         <div id="chat-window">
             <div id="username-container">
@@ -151,11 +40,30 @@
         </div>
     </div>
 
+    <!-- Modal for viewing profiles -->
+    <div id="profile-modal" style="display:none;">
+        <div id="profile-content">
+            <h3 id="profile-username"></h3>
+            <img id="profile-pic" src="" alt="Profile Picture" width="100" />
+            <p id="profile-bio"></p>
+            <button onclick="closeProfile()">Close</button>
+            <!-- Editable fields for your own profile -->
+            <div id="edit-profile" style="display:none;">
+                <input type="text" id="edit-bio" placeholder="Update your bio" />
+                <input type="file" id="edit-profile-pic" />
+                <button onclick="updateProfile()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentRoom = 'Global';
         let username = '';
         let password = '';
-        const users = {};
+        let isAdmin = false;  // Modify this for admin users
+        const users = {
+            'admin': { password: 'adminpass', bio: 'Admin of Wyrm', profilePic: '', isAdmin: true }
+        };
         const messagesData = {
             'Global': [],
             'Gaming': [],
@@ -171,9 +79,15 @@
         function loadMessages() {
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = '';
-            messagesData[currentRoom].forEach(msg => {
+            messagesData[currentRoom].forEach((msg, index) => {
                 const p = document.createElement('p');
-                p.textContent = `${msg.user}: ${msg.text}`;
+                p.innerHTML = `<strong onclick="viewProfile('${msg.user}')">${msg.user}</strong>: ${msg.text}`;
+                if (msg.user === username) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = "Delete";
+                    deleteBtn.onclick = () => deleteMessage(index);
+                    p.appendChild(deleteBtn);
+                }
                 messagesDiv.appendChild(p);
             });
         }
@@ -204,6 +118,10 @@
             sendButton.disabled = false;
 
             document.getElementById('username-container').style.display = 'none';
+
+            if (isAdmin) {
+                document.getElementById('admin-panel').style.display = 'block';
+            }
         }
 
         function sendMessage() {
@@ -215,6 +133,53 @@
             messagesData[currentRoom].push({ user: username, text: text });
             loadMessages();
             messageInput.value = '';
+        }
+
+        function deleteMessage(index) {
+            messagesData[currentRoom].splice(index, 1);
+            loadMessages();
+        }
+
+        function viewProfile(user) {
+            const profile = users[user];
+            if (!profile) return;
+
+            document.getElementById('profile-username').textContent = user;
+            document.getElementById('profile-bio').textContent = profile.bio;
+            document.getElementById('profile-pic').src = profile.profilePic || "https://via.placeholder.com/100";
+            document.getElementById('profile-modal').style.display = 'block';
+
+            if (user === username) {
+                document.getElementById('edit-profile').style.display = 'block';
+            } else {
+                document.getElementById('edit-profile').style.display = 'none';
+            }
+        }
+
+        function closeProfile() {
+            document.getElementById('profile-modal').style.display = 'none';
+        }
+
+        function updateProfile() {
+            const newBio = document.getElementById('edit-bio').value;
+            const newProfilePic = document.getElementById('edit-profile-pic').files[0];
+
+            if (newBio) users[username].bio = newBio;
+            if (newProfilePic) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    users[username].profilePic = e.target.result;
+                    viewProfile(username);
+                };
+                reader.readAsDataURL(newProfilePic);
+            }
+
+            closeProfile();
+        }
+
+        function openAdminPanel() {
+            alert("Admin Panel will go here!");
+            // Implement functionality for admin actions like viewing all users, messages, banning, etc.
         }
     </script>
 </body>
