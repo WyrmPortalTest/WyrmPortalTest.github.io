@@ -5,7 +5,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wyrm Chat Room</title>
     <style>
-        /* (Styling remains largely the same) */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(180deg, #1B0030, #000000);
+            color: #C0C0C0;
+        }
+        header {
+            background-color: #2E003E;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+        h1 {
+            margin: 0;
+            color: #C0C0C0;
+            margin-left: 10px; /* Adjust spacing for the logo */
+        }
+        #logo {
+            width: 40px; /* Adjust the logo size */
+            height: 40px; /* Adjust the logo size */
+        }
+        #container {
+            display: flex;
+            height: 80vh;
+        }
+        #sidebar {
+            width: 250px;
+            background-color: #2E003E;
+            padding: 15px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+        }
+        #sidebar h2 {
+            color: #C0C0C0;
+        }
+        .chat-room {
+            background-color: #1B0030;
+            color: #C0C0C0;
+            margin: 10px 0;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .chat-room:hover {
+            background-color: #3E0050;
+        }
+        #chat-window {
+            flex: 1;
+            padding: 15px;
+            background-color: #1B0030;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #C0C0C0;
+        }
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #C0C0C0;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #2E003E;
+            color: #C0C0C0;
+            border-radius: 5px;
+        }
+        #input-container {
+            display: flex;
+        }
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #C0C0C0;
+            border-radius: 5px;
+            background-color: #1B0030;
+            color: #C0C0C0;
+        }
+        #send-button {
+            padding: 10px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2E003E;
+            color: #C0C0C0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #send-button:hover {
+            background-color: #3E0050;
+        }
+        #username-container {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        #username-input,
+        #password-input {
+            padding: 10px;
+            border: 1px solid #C0C0C0;
+            border-radius: 5px;
+            background-color: #1B0030;
+            color: #C0C0C0;
+            margin-bottom: 10px;
+        }
+        #set-username-button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2E003E;
+            color: #C0C0C0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #set-username-button:hover {
+            background-color: #3E0050;
+        }
+        .user-badge {
+            color: gold; /* Color for badges */
+            margin-left: 5px;
+            font-size: 0.8em; /* Smaller font size for badges */
+        }
+        .profile-pic {
+            width: 30px; /* Profile picture size */
+            height: 30px; /* Profile picture size */
+            border-radius: 50%; /* Make it circular */
+            vertical-align: middle; /* Align with text */
+        }
+        /* Modal styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgb(0,0,0); 
+            background-color: rgba(0,0,0,0.4); 
+            padding-top: 60px; 
+        }
+        .modal-content {
+            background-color: #2E003E;
+            margin: 5% auto; 
+            padding: 20px;
+            border: 1px solid #C0C0C0;
+            width: 300px; 
+            border-radius: 10px;
+        }
+        .close {
+            color: #C0C0C0;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #username-message {
+            color: #FF0000; /* Red color for error messages */
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
