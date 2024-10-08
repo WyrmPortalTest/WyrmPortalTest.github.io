@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wyrm Chat Room</title>
     <style>
+        /* (Styling remains largely the same with some updates) */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -168,6 +169,54 @@
             color: #FF0000; /* Red color for error messages */
             margin-top: 10px;
         }
+        #profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        #profile-content {
+            background-color: #1B0030;
+            color: #C0C0C0;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+        }
+        #profile-content img {
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+        .message {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .message img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        /* Close button for profile modal */
+        #profile-content button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #2E003E;
+            color: #C0C0C0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #profile-content button:hover {
+            background-color: #3E0050;
+        }
     </style>
 </head>
 <body>
@@ -202,8 +251,8 @@
         </div>
     </div>
 
-    <!-- Modal for viewing profiles -->
-    <div id="profile-modal" style="display:none;">
+    <!-- Modal for viewing and editing profiles -->
+    <div id="profile-modal">
         <div id="profile-content">
             <h3 id="profile-username"></h3>
             <img id="profile-pic" src="" alt="Profile Picture" width="100" />
@@ -224,7 +273,7 @@
         let password = '';
         let isAdmin = false;  // Modify this for admin users
         const users = {
-            'admin': { password: 'adminpass', bio: 'Admin of Wyrm', profilePic: '', isAdmin: true }
+            'admin': { password: 'adminpass', bio: 'Admin of Wyrm', profilePic: 'https://via.placeholder.com/100', isAdmin: true }
         };
         const messagesData = {
             'Global': [],
@@ -242,15 +291,17 @@
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = '';
             messagesData[currentRoom].forEach((msg, index) => {
-                const p = document.createElement('p');
-                p.innerHTML = `<strong onclick="viewProfile('${msg.user}')">${msg.user}</strong>: ${msg.text}`;
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                const profilePic = users[msg.user].profilePic || "https://via.placeholder.com/40";
+                messageDiv.innerHTML = `<img src="${profilePic}" alt="Profile Picture" /><strong onclick="viewProfile('${msg.user}')">${msg.user}</strong>: ${msg.text}`;
                 if (msg.user === username) {
                     const deleteBtn = document.createElement('button');
                     deleteBtn.textContent = "Delete";
                     deleteBtn.onclick = () => deleteMessage(index);
-                    p.appendChild(deleteBtn);
+                    messageDiv.appendChild(deleteBtn);
                 }
-                messagesDiv.appendChild(p);
+                messagesDiv.appendChild(messageDiv);
             });
         }
 
@@ -309,7 +360,7 @@
             document.getElementById('profile-username').textContent = user;
             document.getElementById('profile-bio').textContent = profile.bio;
             document.getElementById('profile-pic').src = profile.profilePic || "https://via.placeholder.com/100";
-            document.getElementById('profile-modal').style.display = 'block';
+            document.getElementById('profile-modal').style.display = 'flex';
 
             if (user === username) {
                 document.getElementById('edit-profile').style.display = 'block';
